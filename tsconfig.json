@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"],
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["src", "tests"],
+  "exclude": ["node_modules", "dist", "tests/fixtures"]
+}
