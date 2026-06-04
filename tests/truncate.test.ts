@@ -7,17 +7,17 @@ function makeFile(path: string, content: string): ScanFileItem {
 
 describe('truncateSnippetsByPriority', () => {
   const files: ScanFileItem[] = [
-    makeFile('src/index.ts', 'entry file content here'),              // P1
-    makeFile('src/app.ts', 'another entry'),                          // P1
+    makeFile('src/index.ts', 'entry file content here'), // P1
+    makeFile('src/app.ts', 'another entry'), // P1
     makeFile('src/routes/users.ts', 'router.get("/users", handler)'), // P2
-    makeFile('src/api/auth.ts', 'POST /login handler'),               // P2
-    makeFile('package.json', '{"name":"test"}'),                      // P3
-    makeFile('.env.example', 'PORT=3000'),                            // P3
-    makeFile('src/models/user.ts', 'export class User { ... }'),      // P4
-    makeFile('src/types/index.ts', 'export interface IUser {}'),      // P4
-    makeFile('src/utils/helper.ts', 'export function helper() {}'),   // P5
-    makeFile('src/components/Button.tsx', 'export const Button'),     // P5
-    makeFile('tests/app.test.ts', 'describe("app", () => {})'),       // P5
+    makeFile('src/api/auth.ts', 'POST /login handler'), // P2
+    makeFile('package.json', '{"name":"test"}'), // P3
+    makeFile('.env.example', 'PORT=3000'), // P3
+    makeFile('src/models/user.ts', 'export class User { ... }'), // P4
+    makeFile('src/types/index.ts', 'export interface IUser {}'), // P4
+    makeFile('src/utils/helper.ts', 'export function helper() {}'), // P5
+    makeFile('src/components/Button.tsx', 'export const Button'), // P5
+    makeFile('tests/app.test.ts', 'describe("app", () => {})'), // P5
   ];
 
   it('should keep high priority files when budget is tight', () => {
@@ -35,16 +35,21 @@ describe('truncateSnippetsByPriority', () => {
   it('should stay within budget', () => {
     const budget = 30;
     const result = truncateSnippetsByPriority(files, budget);
-    // estimateTokens is roughly per-character based, so it should always be <= budget
-    // Plus the function uses cumulative check, but last file might push slightly over
-    // Actually, the function breaks when cumulative + next > budget, so cumulative <= budget
-    // But there's a guard: kept.length > 0 ensures we keep at least one file
-    expect(result.totalTokens).toBeLessThanOrEqual(budget + 50); // allow some slack for rounding
+    expect(result.totalTokens).toBeLessThanOrEqual(budget);
   });
 
   it('should keep at least one file even if over budget', () => {
     const result = truncateSnippetsByPriority(files, 1);
     expect(result.snippets.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should truncate first file content when it alone exceeds budget', () => {
+    const bigContent = Array.from({ length: 50 }, () => 'word '.repeat(20)).join('\n');
+    const bigFile = makeFile('src/index.ts', bigContent);
+    const result = truncateSnippetsByPriority([bigFile], 10);
+    expect(result.snippets.length).toBe(1);
+    // 截断后内容应短于原始内容
+    expect(result.snippets[0].content.length).toBeLessThan(bigContent.length);
   });
 
   it('should sort by priority (P1 first)', () => {
@@ -57,11 +62,10 @@ describe('truncateSnippetsByPriority', () => {
   it('should include config files before models', () => {
     const result = truncateSnippetsByPriority(files, 500);
     const paths = result.snippets.map((f) => f.path);
+    expect(paths).toContain('package.json');
+    expect(paths).toContain('src/models/user.ts');
     const pkgIdx = paths.indexOf('package.json');
     const modelIdx = paths.indexOf('src/models/user.ts');
-    // Config (P3) should come before model (P4) if both are present
-    if (pkgIdx !== -1 && modelIdx !== -1) {
-      expect(pkgIdx).toBeLessThan(modelIdx);
-    }
+    expect(pkgIdx).toBeLessThan(modelIdx);
   });
 });

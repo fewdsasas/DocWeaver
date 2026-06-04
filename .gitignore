@@ -2,6 +2,16 @@ node_modules/
 dist/
 coverage/
 .idea/
-.docweaverrc
-README.docweaver.md
+.vscode/
+.DS_Store
+Thumbs.db
 *.log
+
+# 安全：密钥和配置
+.docweaverrc
+*.pem
+*.key
+.env*
+
+# 生成产物
+README.docweaver.md

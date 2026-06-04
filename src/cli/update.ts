@@ -6,7 +6,10 @@ import { generateReadme } from '../core/generator';
 import { mergeUpdate } from '../core/merger';
 import { estimateTokens } from '../utils/token';
 
-export async function updateCommand(options: { force?: boolean; preview?: boolean }): Promise<void> {
+export async function updateCommand(options: {
+  force?: boolean;
+  preview?: boolean;
+}): Promise<void> {
   const cwd = process.cwd();
   const readmePath = path.join(cwd, 'README.md');
 
@@ -15,7 +18,12 @@ export async function updateCommand(options: { force?: boolean; preview?: boolea
     oldContent = fs.readFileSync(readmePath, 'utf-8');
   }
 
-  const { context } = prepareContext(cwd);
+  let context;
+  try {
+    ({ context } = prepareContext(cwd));
+  } catch (err) {
+    throw new Error(`扫描项目失败: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   const startTime = Date.now();
   console.log('🤖 生成中...');
@@ -41,6 +49,8 @@ export async function updateCommand(options: { force?: boolean; preview?: boolea
     console.log('✨ README.md 已生成');
   }
 
-  console.log(`📊 Token 消耗: Input ${context.totalTokens} / Output ~${estimateTokens(newContent)}`);
+  console.log(
+    `📊 Token 消耗: Input ${context.totalTokens} / Output ~${estimateTokens(newContent)}`,
+  );
   console.log(`⏱️  耗时: ${elapsed}s`);
 }

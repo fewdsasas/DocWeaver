@@ -8,7 +8,7 @@ function detectProjectType(context: ProjectContext): string {
   if (/components?\//.test(paths) || /\.vue\b/.test(paths) || /\.tsx\b/.test(paths)) {
     return 'UI 组件库';
   }
-  if (/cli|tool|bin\//.test(name + paths)) {
+  if (/\bcli\b|\btool\b|bin\//.test(name + ' ' + paths)) {
     return '工具类';
   }
   if (/admin\//.test(paths) || /dashboard\b/.test(paths) || /router\b/.test(paths)) {
@@ -17,10 +17,13 @@ function detectProjectType(context: ProjectContext): string {
   if (/core\//.test(paths) || /packages\//.test(paths)) {
     return '框架/引擎';
   }
-  if (/model\//.test(paths) || /api\//.test(paths) || /llm\b/.test(paths)) {
+  if (/model\//.test(paths) || /api\//.test(paths)) {
     return 'AI/数据产品';
   }
-  if (/docs?\//.test(paths)) {
+  if (
+    (/docs?\//.test(paths) && /\b(tutorial|example|learn|guide)s?\b/i.test(paths)) ||
+    /notebooks?\//.test(paths)
+  ) {
     return '学习资源';
   }
   return '通用项目';

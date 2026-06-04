@@ -1,11 +1,12 @@
 import fs from 'fs-extra';
+import { Dirent } from 'fs';
 import path from 'path';
 import ignore from 'ignore';
 import { isBlacklisted } from '../security/blacklist';
 import { ScanFileItem } from '../types/context';
 import { SCANNER } from '../config';
 
-const { MAX_FILES_PER_DIR, MAX_FILE_LINES, HALF_LINES, MAX_FILE_SIZE } = SCANNER;
+const { MAX_FILES_PER_DIR, MAX_FILE_LINES, HALF_LINES, MAX_FILE_SIZE, MAX_DEPTH } = SCANNER;
 
 function loadGitignore(dir: string): ReturnType<typeof ignore> {
   const ig = ignore();
@@ -70,8 +71,12 @@ function traverse(
   ig: ReturnType<typeof ignore>,
   rootDir: string,
   depth: number,
+  preReadEntries?: Dirent[],
 ): { tree: string; snippets: ScanFileItem[] } {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  if (depth >= MAX_DEPTH) {
+    return { tree: '', snippets: [] };
+  }
+  const entries = preReadEntries ?? (fs.readdirSync(dir, { withFileTypes: true }) as Dirent[]);
   const fileEntries: Dirent[] = [];
   const dirEntries: Dirent[] = [];
 
@@ -88,7 +93,7 @@ function traverse(
     }
   }
 
-  let tree = '';
+  const treeLines: string[] = [];
   const indent = '  '.repeat(depth);
   const snippets: ScanFileItem[] = [];
 
@@ -97,14 +102,16 @@ function traverse(
     const fullPath = path.join(dir, file.name);
     const relativePath = path.relative(rootDir, fullPath).replace(/\\/g, '/');
 
-    tree += `${indent}${relativePath}\n`;
+    treeLines.push(`${indent}${relativePath}`);
 
     try {
-      const content = fs.readFileSync(fullPath, 'utf-8');
-      if (content.length > MAX_FILE_SIZE) {
-        console.log(`⚠️ 已跳过大型文件 (${(content.length / MAX_FILE_SIZE).toFixed(1)}MB): ${relativePath}`);
+      const stat = fs.statSync(fullPath);
+      if (stat.size > MAX_FILE_SIZE) {
+        const sizeMB = (stat.size / (1024 * 1024)).toFixed(1);
+        console.log(`⚠️ 已跳过大型文件 (${sizeMB}MB): ${relativePath}`);
         continue;
       }
+      const content = fs.readFileSync(fullPath, 'utf-8');
       snippets.push({
         path: relativePath,
         content: truncateContent(content),
@@ -122,8 +129,9 @@ function traverse(
 
     // Count visible files in subdirectory for collapse decision
     let subFileCount = 0;
+    let subEntries: Dirent[] | undefined;
     try {
-      const subEntries = fs.readdirSync(subDir, { withFileTypes: true });
+      subEntries = fs.readdirSync(subDir, { withFileTypes: true }) as Dirent[];
       for (const subEntry of subEntries) {
         const subRelative = path.join(relativeDir, subEntry.name).replace(/\\/g, '/');
         if (subEntry.isFile() && !shouldSkip(subRelative, ig)) {
@@ -135,18 +143,18 @@ function traverse(
     }
 
     if (subFileCount > MAX_FILES_PER_DIR) {
-      tree += `${indent}${relativeDir}/... (${subFileCount} files)\n`;
+      treeLines.push(`${indent}${relativeDir}/... (${subFileCount} files)`);
       // Still recurse to read snippets, just collapse the tree display
-      const result = traverse(subDir, ig, rootDir, 1);
+      const result = traverse(subDir, ig, rootDir, depth + 1, subEntries);
       snippets.push(...result.snippets);
     } else {
-      const result = traverse(subDir, ig, rootDir, depth + 1);
-      tree += result.tree;
+      const result = traverse(subDir, ig, rootDir, depth + 1, subEntries);
+      if (result.tree) treeLines.push(result.tree.trimEnd());
       snippets.push(...result.snippets);
     }
   }
 
-  return { tree, snippets };
+  return { tree: treeLines.length > 0 ? treeLines.join('\n') + '\n' : '', snippets };
 }
 
 export function scanProject(dir: string): { snippets: ScanFileItem[]; tree: string } {
@@ -161,7 +169,3 @@ export function scanDir(dir: string): ScanFileItem[] {
 export function buildTree(dir: string): string {
   return scanProject(dir).tree;
 }
-
-// Re-export types used elsewhere
-import { Dirent } from 'fs';
-export type { Dirent };

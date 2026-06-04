@@ -3,7 +3,7 @@
   <p><strong>AI 驱动的代码库文档自动生成与同步 CLI 工具</strong></p>
 
   ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-  ![License](https://img.shields.io/badge/license-MIT-green)
+  ![License](https://img.shields.io/badge/license-GPL%20v3-green)
   ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
   ![TypeScript](https://img.shields.io/badge/typescript-ESM-blue)
 
@@ -47,7 +47,7 @@ DocWeaver 是一款面向开发者的 AI-Native 代码库文档自动化工具�
 ### 安装
 
 ```bash
-git clone https://github.com/example/docweaver.git
+git clone https://github.com/fewdsasas/DocWeaver.git
 cd docweaver
 npm install
 npm run build
@@ -96,7 +96,7 @@ node dist/index.js config
 
 | 技术 | 版本 | 说明 |
 |------|------|------|
-| TypeScript | 5.x | 类型安全，ESM 严格模式 |
+| TypeScript | 6.x | 类型安全，ESM 严格模式 |
 | Commander.js | 14.x | CLI 命令框架 |
 | OpenAI SDK | 6.x | LLM 调用抽象层 |
 | Ora | 9.x | 终端加载动画 |
@@ -132,12 +132,13 @@ src/
 │   └── templates.ts  # 6 种项目类型模板
 ├── security/         # 安全防火墙
 │   ├── blacklist.ts  # 文件黑名单 (14 种敏感文件)
-│   └── redactor.ts   # 内容脱敏 (5 种正则模式)
+│   └── redactor.ts   # 内容脱敏 (16 种正则模式)
 ├── types/            # 核心数据契约
-│   └── context.ts    # ScanFileItem / ProjectContext / MergerBlock / CliResult
+│   └── context.ts    # ScanFileItem / ProjectContext
 ├── utils/            # 工具函数
-│   ├── token.ts      # Token 预估 (英文0.3/中文1.5/混合0.8)
-│   └── truncate.ts   # 优先级 Token 裁剪 (P1~P5)
+│   ├── token.ts      # Token 预估 (英文0.55/中文1.5/混合0.8)
+│   ├── truncate.ts   # 优先级 Token 裁剪 (P1~P5)
+│   └── config.ts     # 配置读写 (.docweaverrc)
 └── index.ts          # 入口文件 (commander + dotenv)
 ```
 
@@ -148,7 +149,7 @@ src/
     │              │             │              │               │              │
     │  .gitignore  │  pkg.json   │  正则替换    │  >6000 触发   │  System      │  10项检查
     │  黑名单过滤  │  go.mod... │  REDACTED    │  按优先级裁剪  │  Prompt      │  后置修正
-    │  折叠截断    │  7种格式   │  5种模式     │               │              │
+    │  折叠截断    │  7种格式   │  16种模式    │               │              │
 ```
 <!-- DOCWEAVER-END -->
 
@@ -200,7 +201,7 @@ npm run build
 
 ## 许可证
 
-本项目采用 [MIT](LICENSE) 许可证。
+本项目采用 [GPL-3.0](LICENSE) 许可证。
 
 ---
 

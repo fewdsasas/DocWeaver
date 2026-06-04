@@ -1,29 +1,8 @@
-import path from 'path';
-import fs from 'fs-extra';
+import { readConfig, writeConfig, DocWeaverConfig } from '../utils/config';
 
-const CONFIG_FILE = '.docweaverrc';
-
-interface DocWeaverConfig {
-  apiKey?: string;
-  baseUrl?: string;
-  model?: string;
-}
-
-export function readConfig(): DocWeaverConfig {
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
-  try {
-    const content = fs.readFileSync(configPath, 'utf-8');
-    return JSON.parse(content);
-  } catch {
-    return {};
-  }
-}
-
-export function writeConfig(config: DocWeaverConfig): void {
-  const configPath = path.join(process.cwd(), CONFIG_FILE);
-  const existing = readConfig();
-  const merged = { ...existing, ...config };
-  fs.writeFileSync(configPath, JSON.stringify(merged, null, 2), 'utf-8');
+function maskApiKey(key: string): string {
+  if (key.length <= 8) return '****';
+  return key.slice(0, 4) + '****' + key.slice(-4);
 }
 
 export async function configCommand(options: {
@@ -40,9 +19,15 @@ export async function configCommand(options: {
   if (Object.keys(config).length > 0) {
     writeConfig(config);
     console.log('✅ 配置已保存到 .docweaverrc');
-    console.log('⚠️  .docweaverrc 包含 API 密钥，请勿提交到版本控制系统。建议将 .docweaverrc 添加到 .gitignore。');
+    console.log(
+      '⚠️  .docweaverrc 包含 API 密钥，请勿提交到版本控制系统。建议将 .docweaverrc 添加到 .gitignore。',
+    );
   } else {
     const current = readConfig();
-    console.log(JSON.stringify(current, null, 2));
+    const display: Record<string, unknown> = { ...current };
+    if (typeof display.apiKey === 'string') {
+      display.apiKey = maskApiKey(display.apiKey);
+    }
+    console.log(JSON.stringify(display, null, 2));
   }
 }

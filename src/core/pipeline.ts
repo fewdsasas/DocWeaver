@@ -13,7 +13,7 @@ export interface PrepareContextOptions {
 
 export function prepareContext(
   cwd: string,
-  options: PrepareContextOptions = {}
+  options: PrepareContextOptions = {},
 ): { context: ProjectContext; totalRedactions: number } {
   const maxTokens = options.maxTokens ?? TOKEN.BUDGET;
 
@@ -37,6 +37,9 @@ export function prepareContext(
     console.log('✅ 未发现敏感信息');
   }
 
+  // 先从完整文件列表解析元数据，再按 token 预算截断（截断只影响送入 LLM 的内容）
+  const metadata = parseAllMetadata(redacted);
+
   let finalSnippets = redacted;
   let finalTokens = totalTokens;
 
@@ -46,8 +49,6 @@ export function prepareContext(
     finalTokens = result.totalTokens;
     console.log(`⚠️ Token 预估超限，已启用精简模式 (保留 ${finalSnippets.length} 个文件)`);
   }
-
-  const metadata = parseAllMetadata(finalSnippets);
 
   if (options.extraMeta) {
     Object.assign(metadata, options.extraMeta);

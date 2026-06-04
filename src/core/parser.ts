@@ -18,7 +18,9 @@ export function parseAllMetadata(files: ScanFileItem[]): ProjectMetadata {
       metadata.dependencies = p.dependencies ? Object.keys(p.dependencies) : [];
       metadata.devDependencies = p.devDependencies ? Object.keys(p.devDependencies) : [];
       metadata.packageManager = 'npm';
-    } catch { /* ignore malformed JSON */ }
+    } catch {
+      console.warn(`⚠️ 无法解析 ${pkgJson.path}，已跳过`);
+    }
   }
 
   // Go - go.mod
@@ -40,8 +42,8 @@ export function parseAllMetadata(files: ScanFileItem[]): ProjectMetadata {
   // Rust - Cargo.toml
   const cargoToml = findFile(files, 'Cargo.toml');
   if (cargoToml) {
-    const n = cargoToml.content.match(/^name\s*=\s*"(.+)"/m);
-    const ver = cargoToml.content.match(/^version\s*=\s*"(.+)"/m);
+    const n = cargoToml.content.match(/^name\s*=\s*"([^"]+)"/m);
+    const ver = cargoToml.content.match(/^version\s*=\s*"([^"]+)"/m);
     if (n) {
       metadata.name = metadata.name || n[1];
       metadata.packageManager = metadata.packageManager || 'cargo';
@@ -52,8 +54,8 @@ export function parseAllMetadata(files: ScanFileItem[]): ProjectMetadata {
   // Python - pyproject.toml
   const pyproject = findFile(files, 'pyproject.toml');
   if (pyproject) {
-    const n = pyproject.content.match(/^name\s*=\s*"(.+)"/m);
-    const ver = pyproject.content.match(/^version\s*=\s*"(.+)"/m);
+    const n = pyproject.content.match(/^name\s*=\s*['"](.+?)['"]/m);
+    const ver = pyproject.content.match(/^version\s*=\s*['"](.+?)['"]/m);
     if (n) {
       metadata.name = metadata.name || n[1];
       metadata.packageManager = metadata.packageManager || 'poetry/pip';

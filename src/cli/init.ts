@@ -5,14 +5,24 @@ import { prepareContext } from '../core/pipeline';
 import { generateReadme } from '../core/generator';
 import { estimateTokens } from '../utils/token';
 
-export async function initCommand(options: { output?: string; dryRun?: boolean; template?: string; language?: string }): Promise<void> {
+export async function initCommand(options: {
+  output?: string;
+  dryRun?: boolean;
+  template?: string;
+  language?: string;
+}): Promise<void> {
   const cwd = process.cwd();
 
   const extraMeta: Record<string, string> = {};
   if (options.template) extraMeta.template = options.template;
   if (options.language) extraMeta.language = options.language;
 
-  const { context } = prepareContext(cwd, { extraMeta });
+  let context;
+  try {
+    ({ context } = prepareContext(cwd, { extraMeta }));
+  } catch (err) {
+    throw new Error(`扫描项目失败: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   const startTime = Date.now();
   console.log('🤖 生成中...');

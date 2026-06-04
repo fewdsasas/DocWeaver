@@ -15,7 +15,12 @@ export async function diffCommand(options: { source?: string }): Promise<void> {
     oldContent = fs.readFileSync(fullSourcePath, 'utf-8');
   }
 
-  const { context } = prepareContext(cwd);
+  let context;
+  try {
+    ({ context } = prepareContext(cwd));
+  } catch (err) {
+    throw new Error(`扫描项目失败: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   const startTime = Date.now();
   console.log('🤖 生成中...');

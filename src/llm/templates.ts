@@ -1,10 +1,13 @@
-export const PROJECT_TYPE_TEMPLATES: Record<string, {
-  focus: string;
-  header: string;
-  features: string;
-  requiredSections: string[];
-  visualNotes: string;
-}> = {
+export const PROJECT_TYPE_TEMPLATES: Record<
+  string,
+  {
+    focus: string;
+    header: string;
+    features: string;
+    requiredSections: string[];
+    visualNotes: string;
+  }
+> = {
   'UI 组件库': {
     focus: '组件列表、在线预览、主题定制、浏览器兼容',
     header: `<div align="center">
@@ -13,7 +16,7 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
   <p>基于 [框架] 的 [定位] 组件库，提供 [数量]+ 高质量组件</p>
   
   [![npm version](https://img.shields.io/npm/v/xxx.svg)](链接)
-  [![license](https://img.shields.io/badge/license-MIT-blue.svg)](链接)
+  [![license](https://img.shields.io/badge/license-GPL%20v3-blue.svg)](链接)
   [![downloads](https://img.shields.io/npm/dm/xxx.svg)](链接)
   
   [文档](链接) | [在线预览](链接) | [更新日志](链接)
@@ -31,7 +34,8 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
       '按需引入 - 说明如何减小打包体积',
       '在线预览 - 必须提供可交互的 Demo 地址',
     ],
-    visualNotes: '组件截图至少 4 张，覆盖不同分类。如有暗黑模式，展示明暗对比图。可用 GIF 展示交互动画。',
+    visualNotes:
+      '组件截图至少 4 张，覆盖不同分类。如有暗黑模式，展示明暗对比图。可用 GIF 展示交互动画。',
   },
 
   '框架/引擎': {
@@ -55,7 +59,8 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
       '快速开始 - 从安装到 Hello World 控制在 5 步以内',
       '升级指南 - 主版本迁移说明',
     ],
-    visualNotes: '需要架构图或模块关系图（ASCII art 或 Mermaid）。性能对比图表。生态图（插件/适配器全景图）。',
+    visualNotes:
+      '需要架构图或模块关系图（ASCII art 或 Mermaid）。性能对比图表。生态图（插件/适配器全景图）。',
   },
 
   'CMS/后台系统': {
@@ -66,7 +71,7 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
   <p>一款 [定位] 的 [类型] 系统，支持 [核心卖点]</p>
   
   [![版本](https://img.shields.io/badge/version-{{VERSION}}-blue)](链接)
-  [![许可证](https://img.shields.io/badge/license-MIT-green)](链接)
+  [![许可证](https://img.shields.io/badge/license-GPL%20v3-green)](链接)
   
   [在线演示](链接) | [文档](链接) | Demo 账号: admin/admin123
 </div>`,
@@ -93,7 +98,7 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
     visualNotes: '大尺寸后台截图（展示实际使用界面）。系统架构图。前后端分离则展示双端截图。',
   },
 
-  '工具类': {
+  工具类: {
     focus: 'GIF 演示、使用场景、对比优势、轻量化',
     header: `<div align="center">
   <img alt="{{NAME}}" width="100" src="logo.png">
@@ -117,7 +122,8 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
       '下载/安装 - 多种安装方式（包管理器/直接下载/Docker）',
       'GIF 演示 - 展示核心操作流程',
     ],
-    visualNotes: 'GIF 是刚需 - 工具类项目 GIF 的说服力远超文字。对比截图（使用前 vs 使用后）。界面截图。',
+    visualNotes:
+      'GIF 是刚需 - 工具类项目 GIF 的说服力远超文字。对比截图（使用前 vs 使用后）。界面截图。',
   },
 
   'AI/数据产品': {
@@ -143,7 +149,7 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
     visualNotes: '产品封面大图（居中）。AI 交互效果截图或录屏。支持能力表格。',
   },
 
-  '学习资源': {
+  学习资源: {
     focus: '目录结构、学习路径、社区链接、持续更新',
     header: `[![Banner](banner.png)](主页链接)
 
@@ -165,7 +171,8 @@ export const PROJECT_TYPE_TEMPLATES: Record<string, {
       '贡献指南 - 资源类项目高度依赖社区贡献',
       '许可证 - 标注每个子资源的许可情况',
     ],
-    visualNotes: 'Banner 图（展示项目氛围）。统计徽章（Star、贡献者、子项目数）。最小化 HTML，以纯 Markdown 列表为主。',
+    visualNotes:
+      'Banner 图（展示项目氛围）。统计徽章（Star、贡献者、子项目数）。最小化 HTML，以纯 Markdown 列表为主。',
   },
 };
 

@@ -41,20 +41,42 @@ function classifyPriority(file: ScanFileItem): number {
   return 5;
 }
 
+function truncateContentToFit(content: string, maxTokens: number): string {
+  const lines = content.split('\n');
+  const kept: string[] = [];
+  let tokens = 0;
+
+  for (const line of lines) {
+    const lineTokens = estimateTokens(line + '\n');
+    if (tokens + lineTokens > maxTokens) break;
+    kept.push(line);
+    tokens += lineTokens;
+  }
+
+  return kept.length > 0 ? kept.join('\n') : lines[0] || '';
+}
+
 export function truncateSnippetsByPriority(
   snippets: ScanFileItem[],
-  maxTokens: number
+  maxTokens: number,
 ): { snippets: ScanFileItem[]; totalTokens: number } {
-  const sorted = [...snippets].sort(
-    (a, b) => classifyPriority(a) - classifyPriority(b)
-  );
+  const sorted = [...snippets].sort((a, b) => classifyPriority(a) - classifyPriority(b));
 
   let cumulative = 0;
   const kept: ScanFileItem[] = [];
 
   for (const snippet of sorted) {
     const tokens = estimateTokens(snippet.content);
-    if (cumulative + tokens > maxTokens && kept.length > 0) {
+    if (cumulative + tokens > maxTokens) {
+      if (kept.length === 0) {
+        // 首个文件超限时截断内容而非完整保留
+        const remaining = maxTokens - cumulative;
+        if (remaining > 0) {
+          const truncated = truncateContentToFit(snippet.content, remaining);
+          kept.push({ ...snippet, content: truncated });
+          cumulative += estimateTokens(truncated);
+        }
+      }
       break;
     }
     kept.push(snippet);

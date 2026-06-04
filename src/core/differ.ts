@@ -18,7 +18,7 @@ export function getDiff(oldText: string, newText: string): string {
       }
     } else {
       for (const line of nonEmptyLast) {
-        if (line.trim()) result.push(`  ${line}`);
+        result.push(`  ${line}`);
       }
     }
   }
